@@ -20,7 +20,7 @@ partial class Program
         public async Task RunAsync(CancellationToken cancellationToken = default)
         {
             var t1 = _udpServer.StartAsync(cancellationToken);
-            var t2 = _appLauncher.RunAsync(cancellationToken);
+            var t2 = _appLauncher.StartAsync(cancellationToken);
 
             var t3 = await Task.WhenAny(t1, t2).ConfigureAwait(false);
 

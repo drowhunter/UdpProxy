@@ -7,7 +7,7 @@ namespace UDPProxy
 {
     public interface IAppLauncher
     {
-        Task RunAsync(CancellationToken cancellationToken = default);
+        Task StartAsync(CancellationToken cancellationToken = default);
     }
 
     public class AppLauncher : IAppLauncher
@@ -20,13 +20,14 @@ namespace UDPProxy
         }        
 
         
-        public async Task RunAsync(CancellationToken cancellationToken = default)
+        public async Task StartAsync(CancellationToken cancellationToken = default)
         {
             string? processName = Path.GetFileNameWithoutExtension(args.ProcessName);
             Process? process = null;
 
             if (processName != null)
             {
+               
                 process = FindProcess(processName);
 
                 if (process == null)
@@ -36,12 +37,13 @@ namespace UDPProxy
                     {
                         if (args.RunCommand.EndsWith(".exe"))
                         {
-                            if (FindProcess(Path.GetFileNameWithoutExtension(args.RunCommand)) == null)
-                                await LaunchExe(args.RunCommand).ConfigureAwait(false);
+                            
+                            if (FindProcess(args.RunCommand) == null)
+                                LaunchExe(args.RunCommand);
                         }
                         else
                         {
-                            var x = await LaunchUrl(args.RunCommand);
+                            var x = LaunchUrl(args.RunCommand);
                             
                         }
 
@@ -64,7 +66,7 @@ namespace UDPProxy
                         if (process == null)
                         {
                             Console.WriteLine("Launching exe " + args.RunCommand);
-                            process = await LaunchExe(args.RunCommand).ConfigureAwait(false);
+                            process = LaunchExe(args.RunCommand);
                         }
                         else
                         {
@@ -116,29 +118,23 @@ namespace UDPProxy
             LaunchUrl($"steam://rungameid/{appId}");
         }
 
-        private Task<Process?> LaunchUrl(string url)
+        private Process LaunchUrl(string url)
         {
-            Process? p = null;
-            try
-            {
-                //"cmd", $"/c start {url}"
-                var procinfo = new ProcessStartInfo(url);
-                procinfo.UseShellExecute = true;
-                p = Process.Start(procinfo);
+            var procinfo = new ProcessStartInfo(url);
+            procinfo.UseShellExecute = true;
+            var p = Process.Start(procinfo);
 
-            } 
-            catch(Exception x)
-            {
+            Console.WriteLine("Launching " + url);
 
-            }
-            return Task.FromResult(p);
+            return p;
         }
 
-        private async Task<Process> LaunchExe(string exe)
+        private Process LaunchExe(string exe)
         {
-            var process = FindProcess(Path.GetFileName(exe));
+            var process = FindProcess(exe);
             if (process == null)
             {
+                Log("Launching exe " + exe);
                 process = new Process
                 {
                     StartInfo = new ProcessStartInfo
@@ -153,14 +149,28 @@ namespace UDPProxy
                 };
                 process.Start();
             }
-
+            
             return process;
         }
         
 
         private Process? FindProcess(string processName)
         {
-            return Process.GetProcesses().FirstOrDefault(p => p.ProcessName.Equals(processName, StringComparison.OrdinalIgnoreCase));
+            if(processName.EndsWith(".exe"))
+            {
+                processName = Path.GetFileNameWithoutExtension(processName);
+            }
+
+            var process = Process.GetProcesses().FirstOrDefault(p => p.ProcessName.Equals(processName, StringComparison.OrdinalIgnoreCase));
+            if (process != null)
+            {
+                Log("Found process " + processName);
+            }
+            else
+            {
+                Log("Process " + processName + " not found");
+            }
+            return process;
         }
 
         private Task<Process?> WaitForProcessToStartAsync(string processName, TimeSpan?  timeout = null, CancellationToken cancellationToken = default)
@@ -180,6 +190,7 @@ namespace UDPProxy
                         
                         if (process != null)
                         {
+                            Log("Process found " + processName);
                             break;
                         }
                     
@@ -188,11 +199,24 @@ namespace UDPProxy
                 }
                 catch (Exception x)
                 {
-                    Console.WriteLine("WaitForProcessAsync:" + x.Message);
+                    LogError("WaitForProcessAsync:" + x.Message);
                 }
 
                 return process;
             });
+        }
+
+        private static void Log(string message)
+        {
+            Console.WriteLine("Process: " + message);
+        }
+
+        private static void LogError(string message)
+        {
+            var color = Console.ForegroundColor;
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("Process: " + message);
+            Console.ForegroundColor = color;
         }
     }
 }

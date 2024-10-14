@@ -1,12 +1,16 @@
 {
   "profiles": {
+    "help": {
+      "commandName": "Project",
+      "commandLineArgs": "--help"
+    },
     "tdusc": {
       "commandName": "Project",
       "commandLineArgs": "--listen-port 20778 --fwd-ports 20777 --run-command \"steam://rungameid/1249970\" --process-name \"tdusc.exe\""
     },
     "dirtrally2": {
       "commandName": "Project",
-      "commandLineArgs": "--listen-port 20778 --fwd-ports 20777,20779 --run-command \"steam://rungameid/690790\" --process-name \"dirtrally2.exe\""
+      "commandLineArgs": "--listen-port 20778 --fwd-ports 20777,20779 --run-command \"steam://rungameid/690790\" --process-name \"dirtrally2.exe\" --debug-mode"
     },
     "notepad": {
       "commandName": "Project",
