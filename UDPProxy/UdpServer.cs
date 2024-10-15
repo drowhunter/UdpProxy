@@ -58,9 +58,9 @@ partial class Program
                     {
                         Log(".");
                     }
-                    
 
-                    
+
+                    int i = 0;
                     foreach (var port in _args.FwdPorts)
                     {
                         try
@@ -78,7 +78,7 @@ partial class Program
                             {
                                 //clients.Add(ep, DateTime.Now);
                                 if (_args.DebugMode)
-                                    Log("o");
+                                    Log(""+i);
                             }
                         }
                         catch (Exception e)
@@ -87,6 +87,8 @@ partial class Program
                                 Log("!");
                             
                         }
+
+                        i++;
                     }
                 } 
                 catch(Exception x)

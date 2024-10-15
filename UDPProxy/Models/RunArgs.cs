@@ -5,6 +5,8 @@ namespace UDPProxy.Models
 {
     public class RunArgs
     {
+        public RunArgs() { }
+
         [Required]
         [Description("the port to bind (listen) on for incoming data")]
         public int ListenPort { get; set; }
